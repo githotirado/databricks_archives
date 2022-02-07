@@ -13,11 +13,15 @@ class Restaurant:
     
     def describe_restaurant(self):
         """Sets forth a restaurant description"""
-        print(f"The restaurant {self.restaurant_name} serves {self.cuisine_type}.")
+        print(f"The restaurant {self.restaurant_name} serves {self.cuisine_type} food.")
 
     def open_restaurant(self):
         """Method to open a restaurant that might be closed"""
         print(f"The restaurant {self.restaurant_name} is open.")
 
 restaurant1 = Restaurant("La Boheme", "French")
-restaurant2 = Restaurant("Mario's", "Peruvian")
+# restaurant2 = Restaurant("Mario's", "Peruvian")
+
+print(f"Manual invocation: {restaurant1.restaurant_name} serves {restaurant1.cuisine_type} food")
+restaurant1.describe_restaurant()
+restaurant1.open_restaurant()
