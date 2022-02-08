@@ -30,22 +30,40 @@ class Restaurant:
         """Dynamically increment number served"""
         self.number_served += inc_number
 
-restaurant1 = Restaurant("La Boheme", "French")
-restaurant2 = Restaurant("Mario's", "Peruvian")
-restaurant3 = Restaurant("El Morfi", "Argentine")
+class IceCreamStand(Restaurant):
+    """A specific type of restaurant inherited from Restaurant"""
+    def __init__(self, restaurant_name, cuisine_type):
+        """Initialize this class with parent class attributes"""
+        super().__init__(restaurant_name, cuisine_type)
+        self.flavors = ['vanilla', 'chocolate', 'mint chocolate chip', 'strawberry']
 
-restaurant1.describe_restaurant()
-print(f"Number served: {restaurant1.number_served}")
-restaurant1.number_served = 72
-print(f"New number served: {restaurant1.number_served}")
-restaurant1.set_number_served(54)
-print(f"Newest number served is {restaurant1.number_served}")
-my_inc = 12
-restaurant1.increment_number_served(my_inc)
-print(f"Incremented number by {my_inc} resulting in {restaurant1.number_served}")
+    def display_flavors(self):
+        print(f"Flavors at this establishment: {self.flavors}")
+
+# restaurant1 = Restaurant("La Boheme", "French")
+# restaurant2 = Restaurant("Mario's", "Peruvian")
+# restaurant3 = Restaurant("El Morfi", "Argentine")
+
+# Exercise 9-4
+# restaurant1.describe_restaurant()
+# print(f"Number served: {restaurant1.number_served}")
+# restaurant1.number_served = 72
+# print(f"New number served: {restaurant1.number_served}")
+# restaurant1.set_number_served(54)
+# print(f"Newest number served is {restaurant1.number_served}")
+# my_inc = 12
+# restaurant1.increment_number_served(my_inc)
+# print(f"Incremented number by {my_inc} resulting in {restaurant1.number_served}")
+
 # print(f"Manual invocation: {restaurant1.restaurant_name} serves {restaurant1.cuisine_type} food")
 # restaurant1.describe_restaurant()
 # restaurant1.open_restaurant()
 
+# Exercise 9-1, 9-2
 # restaurant2.describe_restaurant()
 # restaurant3.describe_restaurant()
+
+# Exercise 9-6
+ice_cream = IceCreamStand("31 Flavors", "Ice Cream")
+ice_cream.describe_restaurant()
+ice_cream.display_flavors()
