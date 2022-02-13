@@ -34,22 +34,3 @@ having   sum(sst.total_submissions) is not null
    or    sum(vst.total_views) is not null
    or    sum(vst.total_unique_views) is not null
 order by con.contest_id;
-
-
-
-
-
-select con.contest_id
-       ,con.hacker_id
-       ,con.name
-       ,sum(sst.total_submissions)
-       ,sum(sst.total_accepted_submissions)
-from  contests con
-      ,colleges col
-      ,challenges cha
-      ,submission_stats sst
-where con.contest_id=col.contest_id
-    and col.college_id=cha.college_id
-    and cha.challenge_id=sst.challenge_id
-group by con.contest_id, con.hacker_id, con.name
-order by con.contest_id;
