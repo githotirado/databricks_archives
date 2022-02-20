@@ -6,3 +6,8 @@ select v.make, v.zip_code, vehicles,
     count(vehicles) over (partition by make, zip_code) as newrank,
 	avg(vehicles) over (partition by make, zip_code) as newavg
 from vehiclecount2020 v;
+
+select v.zip_code,
+	row_number() over (order by zip_code)
+from vehiclecount2020 v
+--order by zip_code;
