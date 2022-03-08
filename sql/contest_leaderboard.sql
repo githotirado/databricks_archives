@@ -10,6 +10,22 @@ group by s.hacker_id, h.name
 having ssum > 0
 order by ssum desc, s.hacker_id asc;
 
+-- Contest Leaderboard (MSSQL) [can't use select aliases in 'having']
+select md.hacker_id
+    , h.name
+    , sum(md.max_score) as sum_max_score
+from hackers h
+inner join
+    (select hacker_id
+        , challenge_id 
+        , max(s.score) as max_score
+    from submissions s
+    group by hacker_id, challenge_id) as md
+    on h.hacker_id = md.hacker_id
+group by md.hacker_id, h.name
+having sum(md.max_score) > 0
+order by sum_max_score desc, md.hacker_id asc;
+
 -- Second solution with partitioning (MSSQL).  Needed distinct row in the partition table
 --  since we don't collapse the rows as we would if we had done a 'max' and group by
 --  which would have collapsed the duplicate row!!
