@@ -26,7 +26,7 @@ group by md.hacker_id, h.name
 having sum(md.max_score) > 0
 order by sum_max_score desc, md.hacker_id asc;
 
--- Second solution with partitioning (MSSQL).  Needed distinct row in the partition table
+-- Second solution with partitioning (MSSQL) and CTE.  Needed distinct row in the partition table
 --  since we don't collapse the rows as we would if we had done a 'max' and group by
 --  which would have collapsed the duplicate row!!
 with ms as (select distinct hacker_id
