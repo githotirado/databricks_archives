@@ -57,7 +57,7 @@ from animals as an
 except (select ad.name, ad.species
 	   from adoptions as ad);
 	   
--- ------------------------------------	   
+-- ----------------------------------------------------------------------------------------	   
 -- --------  breeds never adopted  ----
 -- breeds never adopted (outer join)
 
@@ -72,15 +72,16 @@ except (select ad.name, ad.species
 -- 			on an.breed = adopted.breed
 -- where ad.name is null and adopted.breed is null;
 
-select distinct an1.breed, an1.species
-from animals as an1
-	left outer join (select distinct breed
-						from animals as an2
-							inner join adoptions as ad2
-								on an2.name = ad2.name and an2.species = ad2.species) as adopted
-			on an1.breed = adopted.breed
-where adopted.breed is null 
-and an1.breed is not null;
+-- Does not work even when an1.breed is not null...
+-- select distinct an1.breed, an1.species
+-- from animals as an1
+-- 	left outer join (select distinct breed, an2.species
+-- 						from animals as an2
+-- 							inner join adoptions as ad2
+-- 								on an2.name = ad2.name and an2.species = ad2.species) as adopted
+-- 			on an1.breed = adopted.breed
+-- where adopted.breed is null 
+-- and an1.breed is not null;
 		
 -- breeds never adopted (not exists) -- NOT WORKING!!!
 
@@ -89,21 +90,22 @@ and an1.breed is not null;
 -- where not exists (select null
 -- 				from adoptions as ad
 -- 				where ad.name = an.name and ad.species = an.species);
-
-select distinct breed, an.species
-from animals as an
-where not exists (select null
-				from adoptions as ad
-				where ad.name = an.name and ad.species = an.species);
+--
+-- select distinct breed, an.species
+-- from animals as an
+-- where not exists (select null
+-- 				from adoptions as ad
+-- 				where ad.name = an.name and ad.species = an.species);
 				
 				
--- breeds never adopted (not in) -- NOT WORKING!!!
+-- breeds never adopted (not in) PARTIALLY WORKS WHEN EXCLUDING NULL FROM SUBQUERY!!!
 select distinct breed, an1.species
 from animals as an1
-where breed not in (select  breed
+where (breed, an1.species) not in (select  breed, an2.species
 				   from animals as an2
 				   	inner join adoptions as ad
-					on an2.name = ad.name and an2.species = ad.species);
+					on an2.name = ad.name and an2.species = ad.species
+				  	where breed is not null);
 					
 -- breeds never adopted (set operators) -- WORKING!!  Provided 2 examples
 select an1.breed, an1.species		-- this is list of breeds that weren't adopted
@@ -117,7 +119,7 @@ from animals as an2
 	inner join adoptions as ad
 		on an2.name = ad.name and an2.species = ad.species;
 		
-select an1.breed, an1.species		-- this is full list of breeds (WORKS!!!)
+select breed, species		-- this is full list of breeds (WORKS!!!)
 from animals as an1
 except
 select an2.breed, an2.species		-- this is list of breeds that were adopted
