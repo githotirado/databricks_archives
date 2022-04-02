@@ -1,5 +1,5 @@
 
--- Contest Leaderboard (MySQL)
+-- Contest Leaderboard (MySQL) [can use select alias in 'having']
 select s.hacker_id, h.name, sum(s.max_score) ssum
 from
     (select hacker_id, challenge_id, max(score) max_score
@@ -10,17 +10,28 @@ group by s.hacker_id, h.name
 having ssum > 0
 order by ssum desc, s.hacker_id asc;
 
+-- MSSQL [cannot use 'select' alias in the 'having' clause]
+select ha.hacker_id, ha.name, sum(mxs.maxscore) as sumscore
+from
+    (
+        select hacker_id, challenge_id, max(score) as maxscore
+        from submissions
+        group by hacker_id, challenge_id
+    ) as mxs
+    inner join hackers as ha
+        on mxs.hacker_id = ha.hacker_id
+group by ha.hacker_id, ha.name
+having sum(mxs.maxscore) > 0
+order by sumscore desc, ha.hacker_id asc;
+
 -- Contest Leaderboard (MSSQL) [can't use select aliases in 'having']
-select md.hacker_id
-    , h.name
-    , sum(md.max_score) as sum_max_score
+select md.hacker_id, h.name, sum(md.max_score) as sum_max_score
 from hackers h
 inner join
-    (select hacker_id
-        , challenge_id 
-        , max(s.score) as max_score
+    (select hacker_id, challenge_id, max(s.score) as max_score
     from submissions s
-    group by hacker_id, challenge_id) as md
+    group by hacker_id, challenge_id
+    ) as md
     on h.hacker_id = md.hacker_id
 group by md.hacker_id, h.name
 having sum(md.max_score) > 0

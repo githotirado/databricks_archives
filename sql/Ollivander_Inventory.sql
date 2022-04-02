@@ -1,4 +1,4 @@
--- Henry attempt with discussion help:
+-- 
 -- Notes: the over (partition) is a table calculation which is always done LAST
 --     in a select statement.  That means the MinCoinsNeeded will not be available
 --     until the end of the select, which means you would need an exterior select to
@@ -45,7 +45,7 @@ with a as (
             , w.power
             , min(w.coins_needed) over ( partition by age, power order by coins_needed ) as min_coins
         from wands w 
-        left join wands_property p on w.code = p.code
+        inner join wands_property p on w.code = p.code
         where p.is_evil = 0 
         ) 
 select id, age, coins_needed, power 
