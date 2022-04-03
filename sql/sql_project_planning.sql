@@ -1,4 +1,4 @@
--- Solution first time (MySQL) [has different datediff implementation]
+-- Solution first time (MySQL) [has different datediff syntax]
 select start_date, min(end_date)
     -- , datediff(min(end_date), start_date)
 from
