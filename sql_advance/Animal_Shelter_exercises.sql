@@ -1,3 +1,18 @@
+-- Animals and vaccination counts, excluding rabbits, rabies vaccine, animals vaccinated on or after 10/1/19
+select an.name, an.species, max(an.primary_color), max(an.breed), count(va.vaccination_time)
+		, max(va.vaccination_time) as maxvax
+from animals as an
+	left outer join vaccinations as va
+		on an.name = va.name 
+			and an.species = va.species
+			-- and va.vaccine <> 'Rabies'
+where an.species <> 'Rabbit' and (va.vaccine <> 'Rabies' or va.vaccine is null)
+group by an.name, an.species --, an.primary_color
+having max(va.vaccination_time) < '#2019-10-01#' 
+	or max(va.vaccination_time) is null
+order by an.species asc, an.name asc;
+-- order by maxvax desc;
+
 -- means to getting max adoption fee
 select max(adoption_fee)
 from adoptions;

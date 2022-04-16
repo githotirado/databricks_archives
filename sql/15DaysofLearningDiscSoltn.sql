@@ -14,9 +14,9 @@ select submission_date,
         from submissions s2 
         where s2.submission_date = s1.submission_date 
         group by hacker_id 
-        order by count(submission_id) desc , hacker_id limit 1) as shit,
+        order by count(submission_id) desc , hacker_id limit 1) as hid,
 
-        (select name from hackers where hacker_id = shit)
+        (select name from hackers where hacker_id = hid)
 from 
     (select distinct submission_date from submissions) s1
 group by submission_date
