@@ -59,22 +59,33 @@ from checkup
 where animal_min >= species_avg
 order by species asc, name asc --, checkup_time asc;
 
-/*
+/* CHAPTER 4 CHALLENGE - AGGREGATE WINDOW FUNCTIONS
 =================================================================================
 get vaccine counts per year + avg of previous 2 years per line and percentage.
 */
-with vacc_data as (select date_part('year', vaccination_time) as year
-					, count(*) as number_of_vaccinations
-				   from vaccinations
-				   group by date_part('year', vaccination_time)),
-vacc_data_2 as (select *
-					, cast(avg(number_of_vaccinations) over (
-									 order by year asc
-									 rows between 2 preceding and 1 preceding) as decimal(5,2)) as previous_2_yr_avg
-				from vacc_data)
+with vt as (
+	select date_part('year', vaccination_time) as year
+		, count(*) as number_of_vaccinations
+	from vaccinations
+	group by date_part('year', vaccination_time)
+),
+	vt2 as (
+		select *
+		, cast(
+				(
+					avg(number_of_vaccinations) 
+						over (
+							  order by year asc
+							  rows between 2 preceding and 1 preceding
+							 )
+				) as decimal(5,2)
+		) as previous_2_years_average
+	from vt
+)
 select *
-	, cast((number_of_vaccinations * 100 / previous_2_yr_avg) as decimal(5,2)) as percent_change
-from vacc_data_2;
+	, cast((number_of_vaccinations * 100 / previous_2_years_average) as decimal(5,2)) as percent_change
+from vt2
+order by year
 
 /*
 extract(year from vaccination_time)
@@ -100,3 +111,30 @@ select year
 		, cast(monthly_revenue * 100 / (sum(monthly_revenue) over (partition by year)) as decimal(5,2)) as pct
 from adopt_table
 order by year, month;
+
+/* CHAPTER 5 LECTURE - ROW_NUMBER
+Get top 3 animals per species having the most routine vaccines
+*/
+with animal_checkups as (select s.species, name, count(name) as number_of_checkups
+						from reference.species as s
+							left outer join routine_checkups as rc
+								on s.species = rc.species
+						group by s.species, name
+						order by s.species, number_of_checkups desc
+						),
+counted_ck as (select *, (
+						select count(*)
+						from animal_checkups as ac2
+						where ac2.species = animal_checkups.species
+						and ac2.number_of_checkups > animal_checkups.number_of_checkups
+					  ) as count_gt_checkups
+			   from animal_checkups),
+routine_count as (select *
+	, row_number() over (partition by species
+				   order by count_gt_checkups asc, name asc
+				 -- order by number_of_checkups desc, name asc
+				  ) as row_counted
+from counted_ck)
+select *
+from routine_count
+where row_counted <= 3
