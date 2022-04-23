@@ -138,3 +138,19 @@ from counted_ck)
 select *
 from routine_count
 where row_counted <= 3
+
+/*
+CHAPTER 5 - CHALLENGE
+Get top 25% of animals by species with fewest temperature exceptions 
+(exception +/- 0.5% of species average) 
+*/
+with data_avg as (
+	select species, name
+		-- , count(*) over (partition by species, name) as number_of_checkups
+		, temperature
+		, cast(avg(temperature) over (partition by species) as decimal(5,2)) as species_avg_temp
+		, checkup_time
+	from routine_checkups)
+select *
+from data_avg
+order by species asc, checkup_time desc;
