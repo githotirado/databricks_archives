@@ -144,13 +144,34 @@ CHAPTER 5 - CHALLENGE
 Get top 25% of animals by species with fewest temperature exceptions 
 (exception +/- 0.5% of species average) 
 */
-with data_avg as (
-	select species, name
-		-- , count(*) over (partition by species, name) as number_of_checkups
-		, temperature
+with data_avg as
+	(select species, name, temperature
 		, cast(avg(temperature) over (partition by species) as decimal(5,2)) as species_avg_temp
 		, checkup_time
-	from routine_checkups)
-select *
-from data_avg
-order by species asc, checkup_time desc;
+	from routine_checkups),
+data_exceptions as
+	(select species, name
+		, count(temperature) 
+		filter (where (
+						temperature >= species_avg_temp*(1 + 0.005)
+						or
+						temperature <= species_avg_temp*(1 - 0.005)
+					  )
+			   ) over (partition by species, name) as number_of_exceptions
+		, max(checkup_time)
+		filter (where (
+						temperature >= species_avg_temp*(1 + 0.005)
+						or
+						temperature <= species_avg_temp*(1 - 0.005)
+					  )
+			   ) over (partition by species, name) as latest_exception
+	from data_avg),
+tiled_group as 
+	(select *
+		, ntile (4) over (partition by species order by number_of_exceptions asc) as tile_grp
+	from data_exceptions
+	group by species, name, number_of_exceptions, latest_exception)
+select species, name, number_of_exceptions, latest_exception
+from tiled_group
+where tile_grp = 1
+order by species asc, number_of_exceptions desc, latest_exception desc;
