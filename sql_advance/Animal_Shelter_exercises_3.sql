@@ -153,16 +153,12 @@ data_exceptions as
 	(select species, name
 		, count(temperature) 
 		filter (where (
-						temperature >= species_avg_temp*(1 + 0.005)
-						or
-						temperature <= species_avg_temp*(1 - 0.005)
+						abs(temperature - species_avg_temp) >= 0.5
 					  )
 			   ) over (partition by species, name) as number_of_exceptions
 		, max(checkup_time)
 		filter (where (
-						temperature >= species_avg_temp*(1 + 0.005)
-						or
-						temperature <= species_avg_temp*(1 - 0.005)
+						abs(temperature - species_avg_temp) >= 0.5
 					  )
 			   ) over (partition by species, name) as latest_exception
 	from data_avg),
