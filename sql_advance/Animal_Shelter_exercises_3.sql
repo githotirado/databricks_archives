@@ -168,7 +168,9 @@ data_exceptions as
 	from data_avg),
 tiled_group as 
 	(select *
-		, ntile (4) over (partition by species order by number_of_exceptions asc) as tile_grp
+		, ntile (4) over (partition by species 
+						  order by number_of_exceptions asc, latest_exception desc
+						 ) as tile_grp
 	from data_exceptions
 	group by species, name, number_of_exceptions, latest_exception)
 select species, name, number_of_exceptions, latest_exception
