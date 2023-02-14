@@ -39,12 +39,11 @@ select a1.species, a1.name,
 	a1.primary_color, a1.admission_date,
 	count(*)
 	over (partition by species
-		  order by admission_date asc
---  		  range between unbounded preceding
---  		  and '1 day' preceding
--- 		  and current row
- 		  rows between unbounded preceding
- 		  and 1 preceding		 
+		  	order by admission_date asc
+  	  		range between unbounded preceding
+       		and '1 day' preceding
+--  		  rows between unbounded preceding
+--  		  and 1 preceding		 
 		 )
 	as number_of_animals
 from animals as a1
