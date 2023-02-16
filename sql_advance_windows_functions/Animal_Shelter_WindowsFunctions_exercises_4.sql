@@ -24,3 +24,38 @@ select species, name,
 	every ( heart_rate >= species_avg_rate )
 	over (partition by species, name)
 from species_rates
+
+-- Exercise: for every year/month, calculate the monthly adoption fee
+--   total as well as that month's percent of total for the year
+--  MY SOLUTION 1 (without CTE), makes it practically unreadable but works
+select DATE_PART ('year', adoption_date) as year,
+	   DATE_PART ('month', adoption_date) as month,
+	   sum(adoption_fee) as month_total,
+		cast(sum(adoption_fee) * 100 
+			 / 
+			 sum(sum(adoption_fee)) over
+		 		(partition by DATE_PART ('year', adoption_date))
+			 as decimal(5,2))
+			 as percent_of_year
+from adoptions
+group by DATE_PART ('year', adoption_date),
+		 DATE_PART ('month', adoption_date)
+order by year asc, month asc;
+
+--  MY SOLUTION 2 (with CTE), makes same query a little longer but readable
+with table_month_total as
+	(
+		select DATE_PART ('year', adoption_date) as year,
+	   		   DATE_PART ('month', adoption_date) as month,
+	   		   sum(adoption_fee) as month_total
+		from adoptions
+		group by DATE_PART ('year', adoption_date),
+				 DATE_PART ('month', adoption_date)		
+	)
+select year, month,
+	   month_total,
+	   cast(month_total * 100 / 
+			 sum(month_total) over (partition by year) as decimal(5,2))
+			 as percent_of_year
+from table_month_total
+order by year asc, month asc;
