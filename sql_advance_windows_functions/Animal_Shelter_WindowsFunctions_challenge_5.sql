@@ -11,7 +11,7 @@ There is no need to return additional tied animals over the 25% mark.
 If the number of animals for a species does not divide by 4 without remainder, you may return 1 more animal, but not less.
 */
 with animal_temp_comp as
-(
+(   -- get main data columns, calculate two temperature thresholds
 	select species, name,
 		temperature,
  		checkup_time,
@@ -20,15 +20,18 @@ with animal_temp_comp as
 	from routine_checkups
 )
 ,animal_num_exceptions as
-(
+( 	-- determine exception rows based on calculated temperature thresholds
 	select *,
 		case
-			when (temperature >= species_avg_plus_5 or temperature <= species_avg_minus_5) then 1
+			when (temperature >= species_avg_plus_5 
+				  or temperature <= species_avg_minus_5)
+		    then 1
 		    else 0
 		end as exception1
 	from animal_temp_comp
 )
-, animals_grouped as (
+, animals_grouped as 
+(	-- Calculate most recent exceptions date (or null), exceptions count per animal
 	select species, name,
 	(
 		select coalesce(max(checkup_time), null)
@@ -42,7 +45,7 @@ with animal_temp_comp as
 	group by species, name
 )
 , animal_list as
-(
+(	-- Segment list into quarters by species.  Identify top 4th
 	select species, name, number_of_exceptions, latest_exception,
 		 ntile(4) over (
 							partition by species
