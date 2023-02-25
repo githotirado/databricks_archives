@@ -77,7 +77,7 @@ with adoption_data as
 	from adoption_w_diff
 )  -- select * from adoption_w_ranking order by species  asc, difference_from_prev_quarter desc
 select species, year, quarter, difference_from_prev_quarter, quarterly_adoptions
-        , ranking
+       -- , ranking
 from adoption_w_ranking
 where ranking <= 5
 order by species asc, difference_from_prev_quarter desc, year asc, quarter asc nulls last
