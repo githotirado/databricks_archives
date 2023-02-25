@@ -44,6 +44,7 @@ with adoption_data as
 			  or (quarter = 2 and  (prev_yr <> year       or prev_qtr <> 1))
 			  or (quarter = 3 and  (prev_yr <> year       or prev_qtr <> 2))
 			  or (quarter = 4 and  (prev_yr <> year       or prev_qtr <> 3))
+			  or prev_yr is null
 			then quarterly_adoptions
 			else (quarterly_adoptions - lag(quarterly_adoptions) 
 									over (
@@ -52,20 +53,31 @@ with adoption_data as
 										)
 				 )
 			 end as difference_from_prev_quarter,
-			 quarterly_adoptions
+		case
+			when prev_yr is null then true
+			else false
+		end as is_first_quarter,
+		quarterly_adoptions
 	from adoption_w_improve
-),
-adoption_w_ranking as
+) -- select * from adoption_w_diff
+, adoption_w_ranking as
 (
 	select *,
 		row_number() over (
 			partition by species 
-			order by difference_from_prev_quarter desc, year desc, quarter desc nulls last
+			order by 
+				-- if first quarter, then no improvement hence override of 0 during ranking
+				--   else use the assigned difference_from_prev_quarter.
+				case
+					when is_first_quarter then 0
+					else difference_from_prev_quarter
+				end
+				desc, year desc, quarter desc
 		) as ranking
 	from adoption_w_diff
-) -- select * from adoption_w_ranking order by species  asc, difference_from_prev_quarter desc
+)  -- select * from adoption_w_ranking order by species  asc, difference_from_prev_quarter desc
 select species, year, quarter, difference_from_prev_quarter, quarterly_adoptions
         , ranking
 from adoption_w_ranking
-where ranking between 2 and 6
+where ranking <= 5
 order by species asc, difference_from_prev_quarter desc, year asc, quarter asc nulls last

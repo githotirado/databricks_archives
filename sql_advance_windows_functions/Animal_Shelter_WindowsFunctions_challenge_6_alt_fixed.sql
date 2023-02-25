@@ -80,15 +80,7 @@ SELECT 	*,
 		ROW_NUMBER ()
 		-- ROW_NUMBER and RANK will return the same result since quarter_start per species is unique
 		OVER (	PARTITION BY species
-				ORDER BY 	CASE  
-			  				-- Bug #2: by setting the first adoption quarter to 0, you are not
-			  				--   		eliminating the row when the time comes to assign row
-			  				-- 			numbers (rankings).  Do not forget that
-			  				--          adoption_difference_from_previous_quarter could be negative
-			  				--			sometimes, and that should NOT rank the negative row after
-			  				--  		the first quarter row.  In fact, the first quarter row should
-			  				--			never be ranked.  Thus, the right solution is to eliminate
-			  				--			the first quarter row before assigning ranks.
+				ORDER BY 	CASE
 							WHEN is_first_quarter THEN 0
 							-- First quarters should be considered as a 0
 							ELSE adoption_difference_from_previous_quarter
@@ -96,8 +88,6 @@ SELECT 	*,
 							quarter_start DESC)
 		AS quarter_row_number
 FROM 	quarterly_adoptions
--- BUG FIX #2: add this 'where' clause to prevent the first quarter from even being ranked
-WHERE   is_first_quarter is false
 )
  -- SELECT * FROM quarterly_adoptions_with_row_number ORDER BY species, /*quarter_row_number,*/ quarter_start;
 SELECT 	species,
