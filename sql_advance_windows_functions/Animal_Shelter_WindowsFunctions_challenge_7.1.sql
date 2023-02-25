@@ -59,11 +59,17 @@ with species_data as
 -- 				  	rows between unbounded preceding and current row
 				 )) as decimal(5,2)) as avg_vacc_animal
 	from species_data
-)  -- select * from species_yr_avg order by species asc, calendar_year asc
-select *
+)-- select * from species_yr_avg order by species asc, calendar_year asc
+, animal_vacc_w_2_prev_yrs as
+(
+	select *
 	, cast(avg(avg_vacc_animal)
 		over (partition by species
 			  order by calendar_year asc
 			  range between '2 year' preceding and '1 year' preceding) as decimal(5,2)) as avg_2_prev_yrs
-from species_yr_avg
+	from species_yr_avg
+)
+select *
+	, cast( avg_vacc_animal * 100 / avg_2_prev_yrs as decimal(5,2)) as percent_change
+	from animal_vacc_w_2_prev_yrs
 order by species asc, calendar_year asc
