@@ -20,7 +20,8 @@ with species_data as
 	from
 		(
 			select  species, 
-			make_date(cast(date_part('year', admission_date) as int), 1, 1) as admission_yr,
+-- 			make_date(cast(date_part('year', admission_date) as int), 1, 1) as admission_yr,
+			date_part('year', admission_date) as admission_yr,
 			count(admission_date) as admitted
 			from animals
 			group by species, date_part('year', admission_date)
@@ -28,7 +29,8 @@ with species_data as
 		left outer join
 		(
 			select  species, 
-			make_date(cast(date_part('year', adoption_date) as int), 1, 1) as adoption_yr,
+-- 			make_date(cast(date_part('year', adoption_date) as int), 1, 1) as adoption_yr,
+			date_part('year', adoption_date) as adoption_yr,
 			count(adoption_date) as adopted
 			from adoptions
 			group by species, date_part('year', adoption_date)
@@ -37,7 +39,9 @@ with species_data as
 		   an.admission_yr = ad.adoption_yr
 		left outer join
 		(
-			select species, make_date(cast(date_part('year', vaccination_time) as int), 1, 1) as vaccine_yr,
+			select species, 
+-- 			make_date(cast(date_part('year', vaccination_time) as int), 1, 1) as vaccine_yr,
+			date_part('year', vaccination_time) as vaccine_yr,
 			count(vaccination_time) as vaccinated
 			from vaccinations
 			group by species, date_part('year', vaccination_time)
@@ -47,7 +51,6 @@ with species_data as
 )  -- select * from species_data order by species asc, calendar_year asc
 , species_yr_avg as
 (
--- 	 select *
  	select species, calendar_year, vaccinated as number_of_vaccinations
   	, sum(admitted - adopted) over (partition by species
  								     order by calendar_year asc
@@ -59,14 +62,17 @@ with species_data as
 -- 				  	rows between unbounded preceding and current row
 				 )) as decimal(5,2)) as avg_vacc_animal
 	from species_data
-)-- select * from species_yr_avg order by species asc, calendar_year asc
+) -- select * from species_yr_avg order by species asc, calendar_year asc
 , animal_vacc_w_2_prev_yrs as
 (
 	select *
 	, cast(avg(avg_vacc_animal)
 		over (partition by species
 			  order by calendar_year asc
-			  range between '2 year' preceding and '1 year' preceding) as decimal(5,2)) as avg_2_prev_yrs
+-- 			  range between '2 year' preceding and '1 year' preceding
+			  rows between 2 preceding and 1 preceding
+			 ) as decimal(5,2)
+		 ) as avg_2_prev_yrs
 	from species_yr_avg
 )
 select *
